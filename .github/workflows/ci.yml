@@ -17,6 +17,12 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      # Builds tokens (incl. WCAG contrast gate), CSS, components and Storybook.
-      - run: pnpm build
-      - run: pnpm test
+      - name: Lint (ESLint + jsx-a11y, Stylelint)
+        run: pnpm lint
+      - name: Build (tokens + WCAG contrast gate, CSS, React, Storybook)
+        run: pnpm build
+      - run: pnpm typecheck
+      - name: Install Chromium for story tests
+        run: pnpm --filter @ozzyos/storybook exec playwright install --with-deps chromium
+      - name: Test (unit, keyboard, axe on every story)
+        run: pnpm test

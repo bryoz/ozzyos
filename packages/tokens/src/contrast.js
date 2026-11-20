@@ -16,7 +16,17 @@ const PAIRS = [
   ['color.action.on-primary', 'color.action.primary-hover', 4.5],
   ['color.status.danger', 'color.bg.default', 4.5],
   ['color.border.strong', 'color.bg.default', 3],
+  ['color.text.default', 'color.bg.muted', 4.5],
+  ['color.text.link', 'color.bg.subtle', 4.5],
+  ['color.status.danger', 'color.bg.subtle', 4.5],
+  ['color.status.success', 'color.bg.default', 4.5],
+  ['color.status.warning', 'color.bg.default', 4.5],
+  ['color.border.strong', 'color.bg.subtle', 3],
+  // Focus ring must be visible against every surface it can sit on (WCAG 2.4.11 / 1.4.11).
   ['color.focus.ring', 'color.bg.default', 3],
+  ['color.focus.ring', 'color.bg.subtle', 3],
+  ['color.focus.ring', 'color.bg.muted', 3],
+  ['color.focus.ring', 'color.bg.accent', 3],
 ];
 
 const get = (obj, p) => p.split('.').reduce((o, k) => o?.[k], obj);

@@ -1,21 +1,16 @@
-import { setCustomElementsManifest } from '@storybook/web-components-vite';
-import manifest from '@ozzyos/components/custom-elements.json';
 import '@ozzyos/css';
-import '@ozzyos/components';
-
-setCustomElementsManifest(manifest);
 
 const BRANDS = ['ozzy', 'example-client'];
 
 /** Applies brand + mode attributes to <html>, mirroring how sites consume the tokens. */
-const withTheme = (story, { globals }) => {
+const withTheme = (Story, { globals }) => {
   const el = document.documentElement;
   el.dataset.brand = globals.brand ?? 'ozzy';
   el.dataset.theme = globals.theme ?? 'light';
-  return story();
+  return <Story />;
 };
 
-/** @type {import('@storybook/web-components-vite').Preview} */
+/** @type {import('@storybook/react-vite').Preview} */
 export default {
   decorators: [withTheme],
   globalTypes: {
@@ -24,10 +19,11 @@ export default {
   },
   initialGlobals: { brand: 'ozzy', theme: 'light' },
   parameters: {
+    // Fail story tests on any axe violation (runs in a real browser, so colour contrast is checked).
     a11y: { test: 'error' },
     backgrounds: { disable: true },
     controls: { expanded: true },
-    // Chromatic modes: keep the default matrix small to stay inside the free snapshot budget.
+    // Keep the default Chromatic matrix small to stay inside the free snapshot budget.
     chromatic: {
       modes: {
         light: { brand: 'ozzy', theme: 'light' },

@@ -1,0 +1,16 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "declaration-property-value-disallowed-list": [
+      { "outline": ["none", "0"], "outline-width": ["0"] },
+      { "message": "Do not remove focus outlines; style :focus-visible instead (WCAG 2.4.7)" }
+    ],
+    "selector-class-pattern": ["^oz-[a-z0-9-]+(__[a-z0-9-]+)?(--[a-z0-9-]+)?$", { "message": "Use oz- prefixed BEM-style class names" }],
+    "custom-property-pattern": null,
+    "declaration-block-single-line-max-declarations": null,
+    "no-descending-specificity": null,
+    "media-feature-range-notation": null,
+    "selector-not-notation": null,
+    "value-keyword-case": ["lower", { "camelCaseSvgKeywords": true, "ignoreKeywords": ["ButtonText", "GrayText"] }]
+  }
+}

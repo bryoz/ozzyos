@@ -2,19 +2,31 @@
   "name": "ozzyos",
   "private": true,
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
-    "lint": "turbo run lint",
+    "lint": "eslint . && stylelint \"packages/css/src/**/*.css\"",
     "storybook": "pnpm --filter @ozzyos/storybook dev",
     "build-storybook": "turbo run build --filter=@ozzyos/storybook",
     "changeset": "changeset",
-    "release": "turbo run build --filter=./packages/* && changeset publish"
+    "release": "turbo run build --filter=./packages/* && changeset publish",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.0",
     "turbo": "^2.5.0",
-    "typescript": "^5.8.0"
-  }
+    "typescript": "^5.8.0",
+    "@eslint/js": "^9.30.0",
+    "eslint": "^9.30.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^16.0.0",
+    "stylelint": "^16.20.0",
+    "stylelint-config-standard": "^39.0.0",
+    "typescript-eslint": "^8.73.0"
+  },
+  "type": "module"
 }

@@ -23,13 +23,6 @@ test('client brand overrides semantic tokens', () => {
   assert.doesNotMatch(css, /--oz-color-blue-600/, 'core primitives must not leak into theme scopes');
 });
 
-test('WordPress theme.json references token CSS variables', () => {
-  const theme = JSON.parse(read('wordpress/ozzy.theme.json'));
-  assert.equal(theme.version, 3);
-  const primary = theme.settings.color.palette.find((p) => p.slug === 'action-primary');
-  assert.equal(primary.color, 'var(--oz-color-action-primary)');
-});
-
 test('contrast helper matches known values', () => {
   assert.equal(contrast('#000000', '#ffffff').toFixed(0), '21');
 });

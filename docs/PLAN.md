@@ -1,157 +1,123 @@
-# OzzyOS Design System — Plan
+# OzzyOS Design System — Plan (v2: React)
 
 ## Context
-`bryoz/ozzyos` is empty. Goal: one design system serving (a) client marketing/blog sites (mostly WordPress today) and (b) SaaS apps, with per-client branding. Requirements: Storybook + Chromatic, Style Dictionary with two-way Figma token/Variable sync, Figma components for design work, npm distribution.
+One design system for (a) client marketing/blog sites and (b) **SaaS apps**, with per-client branding. WordPress integration is **out of scope** for this spec (to be addressed later). Requirements: Storybook + Chromatic, Style Dictionary with two-way Figma token/Variable sync, Figma components, npm distribution. Repo `bryoz/ozzyos` is **public**.
 
-Decisions taken (from Q&A):
-- **Lit web components** — framework-agnostic, so one component set works in WordPress, plain HTML and React SaaS.
-- **Figma Professional** → no REST Variables write API and no Code Connect. Sync goes through a small custom Figma plugin (Plugin Variables API works on Pro).
-- **Multi-brand themes** — core system + per-client brand token sets, light/dark modes.
+Built so far: pnpm/Turborepo monorepo, DTCG tokens (2 brands × light/dark), Style Dictionary → CSS/JS/JSON, WCAG contrast gate, `@ozzyos/css` foundation, `@ozzyos/react` `Button`, Storybook 10 (react-vite) with axe on every story, CI/Chromatic/Changesets workflows with npm trusted publishing.
 
-## Recommendations (where you asked for advice)
-1. **Distribution: npm *and* CDN.** Scoped packages `@ozzyos/*` on npm (public, or GitHub Packages if private). Every release also serves a prebuilt ESM bundle + CSS via jsDelivr, so WordPress/Webflow sites need no build step. Versioning via Changesets.
-2. **WordPress stays the marketing/blog platform** (non-technical clients need its editor). The WordPress deliverable is a **block theme** generated from tokens — `theme.json` + block styles + block patterns — so clients edit with core blocks and stay on-brand. Keep the theme in Git (files, not DB) so Claude can work on it effectively.
-3. **Token sync: free path first.** Tokens Studio's free tier syncs JSON to GitHub but **Figma Variables sync is a paid feature** (~€39–49/user/month). Instead build a small private Figma plugin (Plugin Variables API works on Pro) that imports/exports DTCG JSON ↔ Variable collections/modes. ~300–500 lines; runs as a local development plugin, no publishing or fees.
-4. **Don't make everything a web component.** Typography, prose (blog body), layout and simple elements are **light-DOM CSS** (classes + tokens) — better for SEO, WordPress editor content, and no-JS rendering. Lit components are reserved for interactive/encapsulated UI.
+**Changes in v2:** React replaces Lit as the component framework (SaaS developer experience: accessible primitives, form libraries, SSR). WordPress theme work and the `theme.json` token output are removed from scope.
+
+Decisions:
+- **React components** on React Aria Components; framework-free tokens + CSS remain usable by any site.
+- **Figma Professional** → custom private plugin for DTCG ↔ Variables sync; no Code Connect.
+- **Multi-brand themes** via `data-brand` / `data-theme` attributes.
+- **Public npm + jsDelivr CDN**, Changesets, npm trusted publishing (OIDC).
+
+## Core principle: CSS is the shared contract
+Tokens and `@ozzyos/css` are framework-free. React components render documented class names (`.oz-button`, `.oz-accordion`…) and add behaviour; all visual styling lives in `@ozzyos/css`, one file per component. No CSS-in-JS. This keeps a future non-React integration (e.g. a CMS theme) possible without restyling anything.
 
 ## Architecture
-pnpm workspaces + Turborepo monorepo.
-
 ```
 ozzyos/
-  tokens/                     # source of truth, DTCG JSON (synced with Figma)
-    core/  (primitives: color ramps, space, type scale, radius, motion)
-    semantic/ (light.json, dark.json → color.bg.surface, text.muted …)
-    brands/  (ozzy.json, client-x.json → overrides semantic + font/radius)
+  tokens/                 DTCG JSON: core/, semantic/{light,dark}.json, brands/*.json
   packages/
-    tokens/        @ozzyos/tokens      Style Dictionary v4 build
-    css/           @ozzyos/css         reset, typography, .prose, layout utils, light-DOM element classes
-    components/    @ozzyos/components  Lit components (+ custom-elements.json manifest)
-    react/         @ozzyos/react       auto-generated React wrappers (@lit/react) for SaaS
-    wordpress/     ozzyos-theme        block theme: generated theme.json, block styles, patterns, enqueues CSS + component bundle
-  apps/
-    storybook/     Storybook 9 (web-components-vite)
-  figma/plugin/    private plugin: DTCG JSON ↔ Figma Variables (import/export)
-  .changeset/  .github/workflows/
+    tokens/     @ozzyos/tokens   Style Dictionary build (CSS vars, JS, JSON)                   [done]
+    css/        @ozzyos/css      reset, base, layout, prose, + per-component CSS             [partly done]
+    react/      @ozzyos/react    React components on React Aria Components [Button done]
+  apps/storybook/                Storybook 10 (react-vite)
+  figma/plugin/                  private plugin: DTCG ↔ Figma Variables
 ```
 
-### Token pipeline
-- Format: **W3C DTCG** (`$value`, `$type`) — native to Style Dictionary v4 and maps cleanly to Figma Variables.
-- Three tiers: **core → semantic → component** (e.g. `button.bg.primary` → `color.action.primary` → `blue.600`). Components consume only semantic/component tokens.
-- Theming: brand × mode resolved at build to CSS scopes: `:root[data-brand="client-x"][data-theme="dark"] { … }`. Custom properties pierce shadow DOM, so Lit components theme automatically.
-- Style Dictionary outputs:
-  - CSS custom properties (per brand/mode) + `tokens.css` all-in-one
-  - JS/TS ESM constants + `.d.ts`
-  - JSON (flattened) for tooling
-  - **WordPress `theme.json`** (palette, font sizes, spacing presets mapped to `--wp--preset--*`) via custom format
-  - Optional Tailwind v4 `@theme` CSS for projects that use Tailwind
-- Figma ↔ code loop (custom plugin):
-  - Figma → code: plugin exports Variables as DTCG JSON → commit to a branch (manual paste/download first; optional later: plugin commits via GitHub API with a personal token) → PR → CI builds, Chromatic diff → merge → release.
-  - Code → Figma: plugin imports `tokens/*.json` (from file or raw GitHub URL) and creates/updates collections and modes (Core; Semantic Light/Dark; Brand per client).
-  - Pro plan caveat: Professional limits the number of modes per collection (verify current limit; historically 10) — fine for light/dark, constrains how many brands share one collection. Mitigation: brands as separate library files or swap brand JSON per client file.
-- Lint: token schema validation + naming rules + WCAG contrast checks for every brand×mode pair in CI (fail the build on AA failures for text pairs).
+### React components (`@ozzyos/react`)
+- Built on **React Aria Components** (unstyled, accessible, keyboard/focus/ARIA handled; exposes state as `data-*` attributes that plain CSS can target, e.g. `.oz-button[data-pressed]`).
+- `react`/`react-dom` as **peerDependencies** (>=18); ESM build with `tsup`, per-component entry points, `"use client"` banners for Next.js App Router.
+- API conventions: `variant`, `size`, `className` passthrough, `ref` forwarding; names match Figma variant names 1:1.
+- Server-rendering friendly by default (no window access at render).
 
-### Components (Lit)
-- Conventions: `oz-` prefix; shadow DOM; `::part` + CSS custom props for styling hooks; `ElementInternals` for form participation; slots for content; `custom-elements.json` generated (drives Storybook docs, React wrappers, editor autocomplete).
-- Accessibility baseline WCAG 2.2 AA: keyboard, focus-visible, ARIA patterns per APG, reduced motion.
-- SSR: `@lit-labs/ssr` declarative shadow DOM for Next (SaaS, if needed); WordPress uses client-side upgrade with light-DOM fallback content.
-- WordPress usage: most marketing UI is core blocks styled by `theme.json`/block styles (no JS). Interactive components (accordion, tabs, dialog, nav) are exposed as a few custom blocks whose saved HTML is the `<oz-*>` element with slotted light-DOM content.
-
-**Inventory (by phase)**
-| Tier | Marketing/blog | SaaS |
-|---|---|---|
-| CSS foundation (P1) | typography, `.prose`, container/grid/stack, link, image/figure, button styles | same |
-| Core components (P2) | button, icon, badge, card, accordion, tabs, nav/menu, dialog, alert | input, textarea, select, checkbox, radio, switch, field (label/help/error), tooltip, toast |
-| Patterns (P3) | hero, feature grid, CTA, testimonial, pricing, footer, post list/card, author, TOC | data table, pagination, dropdown menu, combobox, sidebar/app shell, empty state, skeleton |
+### Token pipeline (unchanged, built)
+Core → semantic → brand; CSS scopes `[data-brand][data-theme]`; contrast gate in build; Style Dictionary outputs CSS/JS/JSON. Figma plugin: export Variables → DTCG JSON → PR; import JSON → create/update collections & modes. Pro mode-count limits may require one Figma file per brand.
 
 ### Storybook + Chromatic
-- Storybook 9 `@storybook/web-components-vite`; autodocs from the custom-elements manifest; addons: a11y, themes (brand + mode toolbar), `@storybook/addon-designs` (embed Figma frames per story), Vitest addon for interaction tests.
-- Token docs pages: colour/type/space/radius rendered from built JSON.
-- Chromatic in GitHub Actions: TurboSnap, **modes** (brand × light/dark), UI Review as design sign-off. Storybook published by Chromatic = living docs site.
-- Snapshot budget (free tier = 5,000/month, testing pauses when exhausted): run Chromatic only on PRs touching `packages/` or `tokens/` (path filter) plus main; default modes = house brand light+dark only, full brand × viewport matrix on a `visual-full` label. Rough maths: 40 components × 4 stories × 2 modes = 320 snapshots per full build; TurboSnap typically cuts PR builds to a fraction of that.
+- Switch to `@storybook/react-vite`; keep brand/mode toolbar decorator, a11y addon (`test: 'error'`), Chromatic modes (house brand light+dark default; full matrix opt-in via `allModes`).
+- Add `@storybook/addon-vitest` for interaction tests; `@storybook/addon-designs` for Figma frame embeds.
+- Chromatic workflow stays path-filtered with TurboSnap to stay within 5,000 free snapshots/month.
 
 ### Figma components
-- Figma library file built from the same tokens: Variables (collections: Core, Semantic with Light/Dark modes, Brand modes) and components whose props mirror code props (variant names identical to attribute values).
-- Build it using the connected **Figma MCP** (`figma-generate-library` workflow) from the Storybook/component source, then designers refine. Keeps names and variants aligned by construction.
-- Code Connect requires Organization/Enterprise — deferred. Interim: Storybook ↔ Figma links via addon-designs, and a parity checklist (component/variant names) checked in review.
+Library built from tokens (Variables) + components with variant props mirroring React props; generated via Figma MCP from Storybook/source, refined by hand. Code Connect deferred (needs Organization plan). Limit Figma to foundations + core components.
 
-### CI/CD (GitHub Actions)
-- PR: install → lint (ESLint, Stylelint, token lint/contrast) → typecheck → build (turbo) → unit/interaction tests (Vitest browser mode) → Chromatic.
-- Main: Changesets release PR → publish to npm → CDN available automatically via jsDelivr.
+### Inventory
+| Tier | Marketing/blog | SaaS |
+|---|---|---|
+| CSS foundation | typography, prose, layout, button | same |
+| Core | button, badge, card, alert, accordion, tabs, nav, dialog, disclosure | input, textarea, select, checkbox, radio, switch, field, tooltip, toast, menu |
+| Patterns | hero, feature grid, CTA, testimonial, pricing, footer, post list, TOC | data table, pagination, combobox, app shell, empty state, skeleton |
+
+## Accessibility testing
+Target: **WCAG 2.2 AA** for every component and pattern. Automated tools catch roughly a third of issues, so the strategy layers automated gates (block merges) with a short manual checklist (blocks releases). All tooling is free.
+
+### Layer 1 — Design time (tokens & Figma)
+- **Contrast gate** (built: `packages/tokens/src/contrast.js`): every brand × mode fails the build below 4.5:1 text / 3:1 UI. Extend pairs as semantic tokens grow (status-on-subtle backgrounds, disabled is exempt but documented, focus ring vs every surface token, link vs surrounding text 3:1 when not underlined).
+- **Figma**: designers use only Variables (no raw hex), so contrast-checked pairs are the only ones available. Annotate focus order, heading levels and accessible names on component specs.
+
+### Layer 2 — Static analysis (every PR, CI `lint`)
+- `eslint-plugin-jsx-a11y` (strict) on `@ozzyos/react` and Storybook.
+- Stylelint: forbid `outline: none` without a `:focus-visible` replacement; `stylelint-a11y`-style rules for `prefers-reduced-motion` on animations.
+- TypeScript: required `aria-label`/`children` unions so icon-only buttons can't compile without an accessible name.
+
+### Layer 3 — Component tests (every PR, CI `test`)
+- **axe on render**: Vitest + Testing Library + `vitest-axe` for each component state (default, disabled, invalid, open/closed).
+- **Keyboard & focus behaviour** (Vitest browser mode or Storybook `play` functions via `@storybook/addon-vitest`), per APG pattern:
+  - Tab order and no focus traps (except dialog, which must trap and **return focus** on close).
+  - Arrow keys/Home/End for tabs, menus, radio groups; Escape closes dialog/menu/tooltip; Enter/Space activate.
+  - Accessible name, role, and state (`aria-expanded`, `aria-selected`, `aria-invalid` + `aria-describedby` on errors) asserted via `getByRole`.
+- **Storybook a11y addon** with `a11y: { test: 'error' }`: axe runs on **every story** in CI through the Vitest addon; violations fail the build. Run under both light and dark globals so dark-mode contrast is covered.
+
+### Layer 4 — Visual / preference modes (Chromatic, budget-aware)
+- Chromatic modes on core components only (opt-in to stay under 5,000 snapshots/mo): `forcedColors: 'active'` (Windows High Contrast), `prefersReducedMotion: 'reduce'`, 200% zoom via a narrow-viewport mode (320 CSS px ≈ 400% reflow).
+- Stories for focus-visible state (`play` focuses the element) so focus-ring regressions show as visual diffs.
+
+### Layer 5 — Manual checklist (per component before first release, per release for changed components)
+- Screen readers: **VoiceOver + Safari** (macOS/iOS), **NVDA + Firefox/Chrome** (Windows; free). Verify name/role/state announcements and live-region toasts.
+- Keyboard-only walkthrough; 200%/400% zoom reflow; Windows High Contrast; reduced motion; touch target ≥ 24×24 px (WCAG 2.5.8); focus not obscured by sticky headers (2.4.11).
+- Results recorded in each component's docs page (Storybook MDX "Accessibility" section: keyboard map, ARIA notes, known limitations, last tested date/AT versions).
+
+### Gates
+| Gate | When | Blocks |
+|---|---|---|
+| Contrast, ESLint/Stylelint, axe unit, keyboard tests, Storybook a11y | every PR | merge |
+| Chromatic preference modes | PRs touching core components | UI Review approval |
+| Manual AT checklist | new/changed component | release (Changeset PR) |
+
+### Component definition of done (a11y)
+Uses semantic HTML/React Aria primitive; APG keyboard pattern implemented and tested; visible focus ≥ 3:1; accessible name required by types; states exposed via ARIA; works in forced colors and reduced motion; zero axe violations in all stories/modes; docs page lists keyboard map and AT test results.
 
 ## Phases & outcomes
+- **Phase 0 — Foundations** ✅ (pipeline green; secrets/npm setup pending on your side).
+- **Phase 1 — Tokens + CSS + Figma plugin**: tokens ✅, CSS foundation ✅ partial, Figma plugin v1. *Outcome:* Figma ↔ JSON round trip < 15 min; brand switch = one attribute; contrast gate green.
+- **Phase 2 — Core components**: React core inventory + shared CSS; Figma library v1. *Outcome:* each component has stories per variant/state, 0 axe violations, keyboard tests, Chromatic baselines.
+- **Phase 3 — Patterns**: marketing and SaaS patterns in React, Next.js example app. *Outcome:* example app Lighthouse ≥90 perf / ≥95 a11y; it consumes `@ozzyos/react` with typed props.
+- **Phase 4 — Hardening**: docs, deprecation policy, bundle budgets (per-component < 10 kB gz excl. React/React Aria), plugin auto-commit.
 
-**Phase 0 — Foundations (week 1)**
-Monorepo, tooling, CI skeleton, Changesets, Storybook boots, Chromatic project linked.
-*Outcome:* empty-but-green pipeline; publishing a dummy `0.0.x` to npm works.
+## Costs (unchanged)
+New spend **$0/mo** beyond Figma Professional (~$16/mo annual). Chromatic free (5,000 snapshots/mo), GitHub Actions free (public repo), npm public + jsDelivr free, Tokens Studio paid tier avoided via custom plugin.
 
-**Phase 1 — Tokens + CSS foundation (weeks 2–3)**
-DTCG token sets (core, semantic light/dark, 2 brands: house + one real client), Style Dictionary build for CSS/JS/theme.json, `@ozzyos/css` typography/prose/layout, Figma Variables plugin v1 (import + export).
-*Outcomes:* change a colour in Figma → export → PR → Chromatic diff → release, round trip under 15 min; brand switch is one attribute; contrast CI passes for every brand×mode.
-
-**Phase 1b — WordPress block theme (weeks 3–4)** *(moved earlier: this is where most client work lives)*
-Generated `theme.json`, block styles for core blocks, header/footer/post patterns, `.prose` for post content, editor styles matching front end.
-*Outcomes:* a non-technical editor can build a landing page and blog post from patterns without leaving the brand; new client = new brand JSON + rebuild.
-
-**Phase 2 — Core components (weeks 4–7)**
-P2 inventory in Lit with stories, docs, a11y and interaction tests; React wrappers; Figma component library v1 matching code variants.
-*Outcomes:* each component has ≥1 story per variant/state, 0 axe violations, keyboard tests, Chromatic baselines; Figma and code variant names match 1:1.
-
-**Phase 3 — Patterns + integrations (weeks 8–11)**
-Marketing and SaaS patterns; custom WP blocks wrapping interactive components; React/Next SaaS usage example.
-*Outcomes:* Lighthouse ≥90 performance / ≥95 accessibility on the WP theme demo; WP theme passes Theme Check; SaaS example consumes `@ozzyos/react` with typed props.
-
-**Phase 4 — Hardening (ongoing)**
-Docs (usage, contribution, token naming), deprecation policy, bundle-size budgets (per-component entry points, `@ozzyos/components/button.js`), plugin auto-commit to GitHub, Code Connect only if the Figma plan is ever upgraded.
-*Outcomes:* semver releases with changelogs; per-component JS < 10 kB gz; documented process for onboarding a new client brand in < 1 day.
-
-## Definition of done (system-level)
-- One token source drives Figma Variables, CSS, JS, theme.json — no hand-maintained duplicates.
-- Every component: story, docs, a11y test, visual baseline, Figma counterpart.
-- Install paths documented and tested: `npm i @ozzyos/components`, CDN `<script type="module">`, WordPress block theme.
-- Adding a brand = new `brands/<client>.json` + Figma mode, no component changes.
-
-## Verification
-- `pnpm build` produces `packages/tokens/dist/{css,js,json,wordpress}`; snapshot test on outputs.
-- `pnpm storybook` renders all stories across brand/mode toolbar; `pnpm test` runs Vitest browser + axe.
-- Chromatic build on PR shows mode matrix; deliberately changing a token surfaces expected diffs.
-- Round-trip test: edit a Variable in Figma, export via plugin, confirm PR + rebuilt CSS; edit JSON, import in Figma, confirm Variable updates.
-- Run the WP theme in `wp-env` (Docker) locally/CI; verify editor and front end match, and render with JS disabled (light-DOM fallback) and enabled.
-
-## Costs (hobby budget)
-| Item | Cost | Notes |
-|---|---|---|
-| Figma Professional (1 Full seat) | ~$16/mo annual ($192/yr) or $20/mo monthly | Assumed already paid. Variables + plugin API work on Pro. |
-| Figma variables sync plugin | $0 | Custom private plugin. Tokens Studio paid tier (~€39–49/user/mo, ~€470–590/yr) **not needed**. |
-| Tokens Studio free | $0 | Optional; free tier lacks Variables sync, so low value here. |
-| Chromatic Free | $0 | 5,000 snapshots/mo, Chrome only; pauses at limit. Next tier ~$149–179/mo — avoid via budget rules above. |
-| Storybook hosting | $0 | Via Chromatic, or GitHub Pages. |
-| GitHub repo + Actions | $0 | Public repo: unlimited Actions minutes. Private: 2,000 min/mo free (enough for this). |
-| npm registry | $0 | Public scoped packages free. Private npm = $7/user/mo — use GitHub Packages (free within limits) if you want private. |
-| CDN (jsDelivr/unpkg) | $0 | Serves from public npm automatically. Private packages → self-host bundle in the WP theme instead. |
-| wp-env / local WP | $0 | Docker. |
-| Domain for docs (optional) | ~$12/yr | Not needed; Chromatic URL works. |
-| **Total new spend** | **$0/mo** (Figma already owned) | Worst realistic: $0 + optional domain. |
-
-Decision for you: **public vs private repo/packages**. Public = everything free incl. CDN; private = still ~free, but no public CDN and Actions minutes capped.
-
-## Critical review
+## Critical review (v2)
 **Pros**
-- Single token source → Figma, CSS, JS, `theme.json`: big time saver once each client brand is a JSON file.
-- Web components work in WordPress, plain HTML and React without per-framework rewrites.
-- Zero recurring cost beyond Figma; all tooling is mainstream and well documented (good for Claude-assisted work).
-- Chromatic + Storybook gives visual regression and a shareable client review link for free.
+- Best-in-class SaaS DX: React Aria accessibility, form libraries, SSR/RSC compatibility, mainstream tooling.
+- CSS-first contract keeps styling framework-independent, so a later CMS integration reuses tokens and CSS unchanged.
+- Narrower scope (no WordPress) makes the hobby timeline realistic.
 
 **Cons / risks**
-- **Scope is large for a hobby project.** Monorepo + Lit + React wrappers + WP theme + Figma plugin + Figma library is several months of evenings. Mitigation: phases are ordered by value; Phases 0–1b alone deliver usable client sites. Treat Phase 3 SaaS patterns as on-demand.
-- **Lit vs WordPress mismatch.** WordPress clients edit with blocks; web components don't appear as editable blocks without per-component block code. Most marketing value will come from `theme.json` + block styles, not Lit. Expect Lit to pay off mainly in SaaS.
-- **Lit vs SaaS (React) friction.** React wrappers work, but form libraries, SSR/hydration and devtools are rougher than native React components. If SaaS becomes the main use, a React-native library (e.g. on Radix/React Aria) would be faster to build and nicer to use.
-- **Shadow DOM trade-offs:** global CSS can't reach inside; clients/devs must use tokens, `::part` and slots. Good for consistency, annoying for one-off client tweaks.
-- **Figma sync is homemade.** No Tokens Studio means maintaining a plugin; Figma API changes are on you. Kept small (JSON ↔ Variables only) to limit this.
-- **No Code Connect on Pro**, so Figma ↔ code component parity is manual (naming checklist).
-- **Chromatic free cap** can silently pause tests in a busy month; budget rules above are required, not optional.
-- **Figma component library is double maintenance.** Every component exists twice. Keep the Figma library to foundations + core components; skip Figma versions of complex SaaS patterns unless designing with them.
-- **Multi-brand × Pro mode limits** may force one Figma file per client brand.
+- **Client marketing sites are not yet served** beyond tokens + CSS; the WordPress integration is deferred and will need behaviour re-implemented for interactive components (React won't run in a PHP theme).
+- **No drop-in components for non-React sites** (only CSS via CDN).
+- **React Aria is a sizeable dependency** for SaaS bundles; tree-shaken per component.
+- Remaining risks from v1: hobby-scale scope, homemade Figma plugin, no Code Connect, Chromatic free cap, Figma/code double maintenance.
 
-**What I'd cut if time is short:** React wrappers (until a SaaS needs them), Phase 3 SaaS patterns, plugin auto-commit, viewport modes in Chromatic.
+**Cut first if short on time:** SaaS patterns, Next example app, plugin auto-commit, full Chromatic brand matrix.
 
+## Verification
+- `pnpm build && pnpm test`: tokens + contrast gate, CSS, `@ozzyos/react` (Vitest + axe), Storybook build.
+- Storybook (react-vite): Button stories render across brand/mode toolbar; a11y panel clean; screenshot check of ozzy/light and example-client/dark.
+- A11y gates prove they bite: temporarily remove a Button's label → TS/ESLint fail; set a low-contrast token → contrast gate fails; add `outline: none` → Stylelint fails; story axe violation → `pnpm test` fails.
+- `pnpm pack` `@ozzyos/react`, install into a scratch Next.js app, render `<Button>` server-side without errors.
+- Release workflow dry run: `changeset status`; after merge, release PR publishes with provenance.

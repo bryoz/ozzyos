@@ -1,17 +1,49 @@
-/* Light-DOM button styles for plain HTML / WordPress. <oz-button> uses the same tokens. */
+/*
+ * .oz-button — single source of button styling.
+ * Works on plain HTML (<a class="oz-button">, <button class="oz-button">) and on
+ * @ozzyos/react <Button>, which adds React Aria state attributes (data-hovered,
+ * data-pressed, data-focus-visible, data-disabled).
+ */
 @layer oz.components {
   .oz-button {
-    display: inline-flex; align-items: center; justify-content: center; gap: var(--oz-space-2);
-    min-height: 2.75rem; padding: var(--oz-space-2) var(--oz-space-5);
-    border: 1px solid transparent; border-radius: var(--oz-brand-radius-control);
-    font-weight: var(--oz-font-weight-semibold); line-height: 1.2; text-decoration: none; cursor: pointer;
-    background: var(--oz-color-action-primary); color: var(--oz-color-action-on-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--oz-space-2);
+    min-height: 2.75rem; /* ≥ 24px target size (WCAG 2.5.8); 44px for comfort */
+    padding: var(--oz-space-2) var(--oz-space-5);
+    border: 1px solid transparent;
+    border-radius: var(--oz-brand-radius-control);
+    background: var(--oz-color-action-primary);
+    color: var(--oz-color-action-on-primary);
+    font: inherit;
+    font-weight: var(--oz-font-weight-semibold);
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
     transition: background-color var(--oz-motion-duration-fast) ease;
   }
-  .oz-button:hover { background: var(--oz-color-action-primary-hover); color: var(--oz-color-action-on-primary); }
+
+  .oz-button:where(:hover, [data-hovered]) { background: var(--oz-color-action-primary-hover); color: var(--oz-color-action-on-primary); }
+  .oz-button[data-pressed] { transform: translateY(1px); }
+
+  /* Plain HTML gets :focus-visible; React Aria sets data-focus-visible. Outline (not box-shadow) survives forced colours. */
+  .oz-button:where(:focus-visible, [data-focus-visible]) { outline: 2px solid var(--oz-color-focus-ring); outline-offset: 2px; }
+
   .oz-button--secondary { background: transparent; color: var(--oz-color-text-default); border-color: var(--oz-color-border-strong); }
-  .oz-button--secondary:hover { background: var(--oz-color-bg-muted); color: var(--oz-color-text-default); }
+  .oz-button--secondary:where(:hover, [data-hovered]) { background: var(--oz-color-bg-muted); color: var(--oz-color-text-default); }
+
   .oz-button--ghost { background: transparent; color: var(--oz-color-text-link); }
-  .oz-button--ghost:hover { background: var(--oz-color-bg-accent); color: var(--oz-color-text-link-hover); }
-  .oz-button:disabled, .oz-button[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+  .oz-button--ghost:where(:hover, [data-hovered]) { background: var(--oz-color-bg-accent); color: var(--oz-color-text-link-hover); }
+
+  .oz-button--sm { min-height: 2.25rem; padding: var(--oz-space-1) var(--oz-space-3); font-size: var(--oz-font-size-sm); }
+  .oz-button--lg { min-height: 3.25rem; padding: var(--oz-space-3) var(--oz-space-6); font-size: var(--oz-font-size-lg); }
+  .oz-button--full { display: flex; width: 100%; }
+
+  .oz-button:where(:disabled, [aria-disabled="true"], [data-disabled]) { opacity: 0.5; cursor: not-allowed; }
+
+  @media (forced-colors: active) {
+    .oz-button { border-color: ButtonText; }
+    .oz-button:where(:disabled, [data-disabled]) { color: GrayText; border-color: GrayText; }
+  }
 }

@@ -1,8 +1,32 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
-    "build": { "dependsOn": ["^build"], "inputs": ["$TURBO_DEFAULT$", "../../tokens/**"], "outputs": ["dist/**", "storybook-static/**"] },
-    "test": { "dependsOn": ["build"] },
-    "lint": {}
-  }
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "../../tokens/**"
+      ],
+      "outputs": [
+        "dist/**",
+        "storybook-static/**"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "build"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^build"
+      ]
+    }
+  },
+  "globalPassThroughEnv": [
+    "PLAYWRIGHT_CHROMIUM_PATH",
+    "PLAYWRIGHT_BROWSERS_PATH"
+  ]
 }

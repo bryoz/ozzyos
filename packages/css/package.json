@@ -4,12 +4,30 @@
   "description": "OzzyOS light-DOM CSS foundation: reset, typography, prose, layout, buttons",
   "type": "module",
   "license": "MIT",
-  "files": ["dist", "src"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bryoz/ozzyos.git",
+    "directory": "packages/css"
+  },
+  "homepage": "https://github.com/bryoz/ozzyos#readme",
+  "bugs": "https://github.com/bryoz/ozzyos/issues",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
   "exports": {
     ".": "./dist/ozzyos.css",
     "./*": "./src/*"
   },
   "style": "./dist/ozzyos.css",
-  "scripts": { "build": "node scripts/build.js" },
-  "dependencies": { "@ozzyos/tokens": "workspace:*" }
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
+  "dependencies": {
+    "@ozzyos/tokens": "workspace:*"
+  }
 }

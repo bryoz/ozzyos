@@ -5,21 +5,29 @@
   "scripts": {
     "dev": "storybook dev -p 6006",
     "build": "storybook build",
+    "test": "vitest run",
     "chromatic": "chromatic --exit-zero-on-changes --only-changed"
   },
   "dependencies": {
-    "@ozzyos/components": "workspace:*",
     "@ozzyos/css": "workspace:*",
+    "@ozzyos/react": "workspace:*",
     "@ozzyos/tokens": "workspace:*",
-    "lit": "^3.3.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^10.6.8",
     "@storybook/addon-docs": "^10.6.8",
     "@storybook/addon-themes": "^10.6.8",
-    "@storybook/web-components-vite": "^10.6.8",
+    "@storybook/addon-vitest": "^10.6.8",
+    "@storybook/react-vite": "^10.6.8",
+    "@types/react": "^19.3.0",
+    "@vitest/browser": "^5.1.1",
+    "@vitest/browser-playwright": "^5.1.1",
     "chromatic": "^18.15.1",
+    "playwright": "^1.50.0",
     "storybook": "^10.6.8",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "vitest": "^5.1.1"
   }
 }

@@ -2,9 +2,6 @@ import StyleDictionary from 'style-dictionary';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { DIST, MODES, brands, selectorFor, sourcesFor } from './config.js';
-import { registerWordPressFormat } from './wordpress.js';
-
-registerWordPressFormat(StyleDictionary);
 
 const isCore = (token) => token.filePath.includes(`${path.sep}core${path.sep}`);
 
@@ -52,16 +49,6 @@ for (const brand of brands()) {
         options: { selector: ':root' },
       });
     }
-    // WordPress theme.json is per brand (light mode drives the editor palette).
-    if (mode === 'light') {
-      platforms.wordpress = {
-        transformGroup: 'css',
-        prefix: 'oz',
-        buildPath: `${DIST}/wordpress/`,
-        files: [{ destination: `${brand}.theme.json`, format: 'wordpress/theme-json' }],
-      };
-    }
-
     const sd = new StyleDictionary({ source: sourcesFor(brand, mode), platforms, log: { verbosity: 'silent' } });
     await sd.buildAllPlatforms();
     scopedCss.push(`themes/${name}.css`);
