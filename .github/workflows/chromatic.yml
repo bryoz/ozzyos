@@ -1,6 +1,7 @@
 name: Chromatic
 # Free tier = 5,000 snapshots/month. Only run when design-relevant files change.
 on:
+  workflow_dispatch: # manual run from the Actions tab
   push:
     branches: [main]
     paths: ['tokens/**', 'packages/**', 'apps/storybook/**']
