@@ -1,0 +1,21 @@
+@layer oz.base {
+  :root { color-scheme: light; }
+  [data-theme="dark"] { color-scheme: dark; }
+  body {
+    background: var(--oz-color-bg-default);
+    color: var(--oz-color-text-default);
+    font-family: var(--oz-brand-font-body);
+    font-size: var(--oz-font-size-md);
+    line-height: var(--oz-font-line-height-normal);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--oz-brand-font-heading);
+    line-height: var(--oz-font-line-height-tight);
+    font-weight: var(--oz-font-weight-bold);
+  }
+  a { color: var(--oz-color-text-link); text-underline-offset: 0.15em; }
+  a:hover { color: var(--oz-color-text-link-hover); }
+  :focus-visible { outline: 2px solid var(--oz-color-focus-ring); outline-offset: 2px; }
+  code, kbd, pre { font-family: var(--oz-font-family-mono); }
+  hr { border: 0; border-top: 1px solid var(--oz-color-border-default); }
+}

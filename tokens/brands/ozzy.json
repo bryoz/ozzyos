@@ -1,0 +1,17 @@
+{
+  "brand": {
+    "$description": "OzzyOS house brand",
+    "primary": {
+      "$type": "color",
+      "subtle": { "$value": "{color.blue.50}" }, "muted": { "$value": "{color.blue.200}" },
+      "base": { "$value": "{color.blue.600}" }, "strong": { "$value": "{color.blue.700}" },
+      "on-dark": { "$value": "{color.blue.400}" }, "on-dark-strong": { "$value": "{color.blue.300}" },
+      "dark-subtle": { "$value": "{color.blue.900}" }
+    },
+    "font": {
+      "heading": { "$type": "fontFamily", "$value": "{font.family.sans}" },
+      "body": { "$type": "fontFamily", "$value": "{font.family.sans}" }
+    },
+    "radius": { "$type": "dimension", "control": { "$value": "{radius.md}" }, "surface": { "$value": "{radius.lg}" } }
+  }
+}

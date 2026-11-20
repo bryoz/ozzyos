@@ -1,0 +1,17 @@
+/* Light-DOM button styles for plain HTML / WordPress. <oz-button> uses the same tokens. */
+@layer oz.components {
+  .oz-button {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--oz-space-2);
+    min-height: 2.75rem; padding: var(--oz-space-2) var(--oz-space-5);
+    border: 1px solid transparent; border-radius: var(--oz-brand-radius-control);
+    font-weight: var(--oz-font-weight-semibold); line-height: 1.2; text-decoration: none; cursor: pointer;
+    background: var(--oz-color-action-primary); color: var(--oz-color-action-on-primary);
+    transition: background-color var(--oz-motion-duration-fast) ease;
+  }
+  .oz-button:hover { background: var(--oz-color-action-primary-hover); color: var(--oz-color-action-on-primary); }
+  .oz-button--secondary { background: transparent; color: var(--oz-color-text-default); border-color: var(--oz-color-border-strong); }
+  .oz-button--secondary:hover { background: var(--oz-color-bg-muted); color: var(--oz-color-text-default); }
+  .oz-button--ghost { background: transparent; color: var(--oz-color-text-link); }
+  .oz-button--ghost:hover { background: var(--oz-color-bg-accent); color: var(--oz-color-text-link-hover); }
+  .oz-button:disabled, .oz-button[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; }
+}

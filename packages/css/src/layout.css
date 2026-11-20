@@ -1,0 +1,10 @@
+@layer oz.layout {
+  .oz-container { width: min(100% - 2 * var(--oz-space-4), var(--oz-size-container-lg)); margin-inline: auto; }
+  .oz-container--narrow { max-width: var(--oz-size-container-md); }
+  .oz-container--wide { max-width: var(--oz-size-container-xl); }
+  .oz-stack { display: flex; flex-direction: column; gap: var(--oz-stack-gap, var(--oz-space-4)); }
+  .oz-cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--oz-cluster-gap, var(--oz-space-3)); }
+  .oz-grid { display: grid; gap: var(--oz-grid-gap, var(--oz-space-5)); grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--oz-grid-min, 16rem)), 1fr)); }
+  .oz-section { padding-block: var(--oz-space-8); }
+  .oz-visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}

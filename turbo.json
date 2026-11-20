@@ -1,0 +1,8 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "inputs": ["$TURBO_DEFAULT$", "../../tokens/**"], "outputs": ["dist/**", "storybook-static/**"] },
+    "test": { "dependsOn": ["build"] },
+    "lint": {}
+  }
+}

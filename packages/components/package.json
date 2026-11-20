@@ -1,0 +1,26 @@
+{
+  "name": "@ozzyos/components",
+  "version": "0.0.0",
+  "description": "OzzyOS Lit web components",
+  "type": "module",
+  "license": "MIT",
+  "files": ["dist", "custom-elements.json"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*.js": "./dist/*/index.js",
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "customElements": "custom-elements.json",
+  "sideEffects": ["./dist/**/index.js", "./dist/index.js"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cem analyze --litelement --globs 'src/**/*.ts' --exclude 'src/**/*.stories.ts'"
+  },
+  "dependencies": { "lit": "^3.3.0" },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.10.4",
+    "@ozzyos/tokens": "workspace:*",
+    "typescript": "^5.8.0"
+  }
+}

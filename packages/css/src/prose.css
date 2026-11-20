@@ -1,0 +1,19 @@
+/* Long-form content (blog posts, WordPress post content). Light DOM by design. */
+@layer oz.base {
+  .oz-prose { max-width: var(--oz-size-measure); font-size: var(--oz-font-size-lg); }
+  .oz-prose > * + * { margin-top: 1.25em; }
+  .oz-prose :is(h2, h3, h4) { margin-top: 2em; }
+  .oz-prose h1 { font-size: var(--oz-font-size-4xl); }
+  .oz-prose h2 { font-size: var(--oz-font-size-3xl); }
+  .oz-prose h3 { font-size: var(--oz-font-size-2xl); }
+  .oz-prose h4 { font-size: var(--oz-font-size-xl); }
+  .oz-prose :is(ul, ol) { padding-left: 1.25em; }
+  .oz-prose li + li { margin-top: 0.4em; }
+  .oz-prose blockquote { border-left: 4px solid var(--oz-color-action-primary); padding-left: var(--oz-space-4); color: var(--oz-color-text-muted); font-style: italic; }
+  .oz-prose pre { background: var(--oz-color-bg-muted); padding: var(--oz-space-4); border-radius: var(--oz-brand-radius-control); overflow-x: auto; font-size: var(--oz-font-size-sm); }
+  .oz-prose :not(pre) > code { background: var(--oz-color-bg-muted); padding: 0.1em 0.3em; border-radius: var(--oz-radius-sm); font-size: 0.9em; }
+  .oz-prose img { border-radius: var(--oz-brand-radius-surface); }
+  .oz-prose figcaption { margin-top: var(--oz-space-2); font-size: var(--oz-font-size-sm); color: var(--oz-color-text-muted); }
+  .oz-prose table { width: 100%; border-collapse: collapse; font-size: var(--oz-font-size-md); }
+  .oz-prose :is(th, td) { padding: var(--oz-space-2) var(--oz-space-3); border-bottom: 1px solid var(--oz-color-border-default); text-align: left; }
+}

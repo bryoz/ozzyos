@@ -1,0 +1,28 @@
+name: Chromatic
+# Free tier = 5,000 snapshots/month. Only run when design-relevant files change.
+on:
+  push:
+    branches: [main]
+    paths: ['tokens/**', 'packages/**', 'apps/storybook/**']
+  pull_request:
+    paths: ['tokens/**', 'packages/**', 'apps/storybook/**']
+
+jobs:
+  chromatic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 } # required for TurboSnap
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - uses: chromaui/action@v13
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: apps/storybook
+          storybookBuildDir: storybook-static
+          onlyChanged: true # TurboSnap
+          exitZeroOnChanges: true
+          autoAcceptChanges: main

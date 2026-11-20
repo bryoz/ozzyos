@@ -1,0 +1,15 @@
+{
+  "name": "@ozzyos/css",
+  "version": "0.0.0",
+  "description": "OzzyOS light-DOM CSS foundation: reset, typography, prose, layout, buttons",
+  "type": "module",
+  "license": "MIT",
+  "files": ["dist", "src"],
+  "exports": {
+    ".": "./dist/ozzyos.css",
+    "./*": "./src/*"
+  },
+  "style": "./dist/ozzyos.css",
+  "scripts": { "build": "node scripts/build.js" },
+  "dependencies": { "@ozzyos/tokens": "workspace:*" }
+}

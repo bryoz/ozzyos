@@ -1,0 +1,17 @@
+{
+  "brand": {
+    "$description": "Example client brand: replace or copy per client",
+    "primary": {
+      "$type": "color",
+      "subtle": { "$value": "{color.teal.50}" }, "muted": { "$value": "{color.teal.200}" },
+      "base": { "$value": "{color.teal.700}" }, "strong": { "$value": "{color.teal.800}" },
+      "on-dark": { "$value": "{color.teal.400}" }, "on-dark-strong": { "$value": "{color.teal.300}" },
+      "dark-subtle": { "$value": "{color.teal.900}" }
+    },
+    "font": {
+      "heading": { "$type": "fontFamily", "$value": "{font.family.serif}" },
+      "body": { "$type": "fontFamily", "$value": "{font.family.sans}" }
+    },
+    "radius": { "$type": "dimension", "control": { "$value": "{radius.sm}" }, "surface": { "$value": "{radius.sm}" } }
+  }
+}

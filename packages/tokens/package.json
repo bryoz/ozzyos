@@ -1,0 +1,23 @@
+{
+  "name": "@ozzyos/tokens",
+  "version": "0.0.0",
+  "description": "OzzyOS design tokens: CSS variables, JS, JSON and WordPress theme.json, built from DTCG sources",
+  "type": "module",
+  "license": "MIT",
+  "files": ["dist"],
+  "exports": {
+    "./css": "./dist/css/tokens.css",
+    "./css/*": "./dist/css/*",
+    "./js/*": "./dist/js/*",
+    "./json/*": "./dist/json/*",
+    "./wordpress/*": "./dist/wordpress/*",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "node src/build.js && node src/contrast.js",
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "style-dictionary": "^5.0.0"
+  }
+}
