@@ -1,6 +1,6 @@
 {
   "name": "@ozzyos/react",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "OzzyOS React components, built on React Aria Components and styled by @ozzyos/css",
   "type": "module",
   "license": "MIT",
