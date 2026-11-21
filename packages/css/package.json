@@ -1,6 +1,6 @@
 {
   "name": "@ozzyos/css",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "OzzyOS light-DOM CSS foundation: reset, typography, prose, layout, buttons",
   "type": "module",
   "license": "MIT",

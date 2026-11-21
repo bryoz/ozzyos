@@ -1,6 +1,6 @@
 {
   "name": "@ozzyos/tokens",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "OzzyOS design tokens: CSS variables, JS and JSON, built from DTCG sources",
   "type": "module",
   "license": "MIT",
